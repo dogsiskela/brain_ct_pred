@@ -1,12 +1,15 @@
-import sys
 
-import pandas as pd
-import matplotlib.pyplot as plt
+# import matplotlib
+# matplotlib.use("TkAgg")
 
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QApplication, QComboBox, QGridLayout, QListWidget, QPushButton, QLabel, QWidget, QSlider
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from src.models.models import predict
 from PyQt5.QtCore import Qt
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from PyQt5.QtWidgets import QApplication, QComboBox, QGridLayout, QListWidget, QPushButton, QLabel, QWidget, QSlider
+from PyQt5.QtGui import QIcon
+import matplotlib.pyplot as plt
+import pandas as pd
+import sys
 
 OPEN_PARAGRAPH = "<p>"
 CLOSE_PARAGRAPH = "</p>"
@@ -68,7 +71,7 @@ class exoplanetFilter(QWidget):
 
         # Buttons
         self.create_prediction_button = QPushButton("Create prediction")
-        self.create_prediction_button.clicked.connect(self.tempFunc)
+        self.create_prediction_button.clicked.connect(self.buttonClick)
 
         #
         self.condition_label = QLabel(OPEN_HEADER + "Condition:" +
@@ -123,6 +126,9 @@ class exoplanetFilter(QWidget):
 
     def tempFunc(self):
         pass
+
+    def buttonClick(self):
+        print('button')
 
     def changePatientNumber(self):
         curr_val = self.patient_number_box.currentText()
