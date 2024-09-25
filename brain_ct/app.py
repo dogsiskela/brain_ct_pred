@@ -2,6 +2,7 @@
 # import matplotlib
 # matplotlib.use("TkAgg")
 
+import numpy as np
 from src.models.models import predict
 from PyQt5.QtCore import Qt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -39,6 +40,7 @@ class exoplanetFilter(QWidget):
         super(exoplanetFilter, self).__init__(parent)
 
         self.patient_id = 49
+        self.predictions = []
 
         pd_new = pd.read_pickle('./patient_data.pkl')
         pd_new = pd_new[pd_new['PatientNumber'] == int(self.patient_id)]
@@ -49,6 +51,10 @@ class exoplanetFilter(QWidget):
         self.index = 0
 
         self.labMission = QLabel('<h4>Image:</h4>')
+
+        self.brain_image_label = QLabel('<h4>Brain image:</h4>')
+        self.mask_original_label = QLabel('<h4>Mask original:</h4>')
+        self.mask_predicted_label = QLabel('<h4>Mask predicted:</h4>')
 
         # TCE Type container
         self.labStarType = QLabel(
@@ -88,6 +94,7 @@ class exoplanetFilter(QWidget):
         # Create canvas for plot previews
         self.canvas = MplCanvas(self)
         self.canvas_mask = MplCanvas(self)
+        self.canvas_predictions = MplCanvas(self)
 
         # Create a slider
         self.slider = QSlider(Qt.Horizontal)
@@ -108,17 +115,29 @@ class exoplanetFilter(QWidget):
         layout.addWidget(self.label, 0, 1)
         layout.addWidget(self.patient_label, 0, 2)
         layout.addWidget(self.patient_number_box, 0, 3)
-        layout.addWidget(self.canvas, 1, 0, 1, 2)
-        layout.addWidget(self.canvas_mask, 1, 2, 1, 5)
-        layout.addWidget(self.patient_number_label, 2, 1)
-        layout.addWidget(self.condition_label, 2, 2)
-        layout.addWidget(self.has_hemorrhage_label, 2, 3)
-        layout.addWidget(self.has_fracture_label, 2, 4)
-        layout.addWidget(self.create_prediction_button, 3, 0)
+        layout.addWidget(self.brain_image_label, 1, 0, 1, 1)
+        layout.addWidget(self.mask_original_label, 1, 1, 1, 2)
+        layout.addWidget(self.mask_predicted_label, 1, 3, 1, 5)
+        layout.addWidget(self.canvas, 2, 0, 1, 1)
+        layout.addWidget(self.canvas_mask, 2, 1, 1, 2)
+        layout.addWidget(self.canvas_predictions, 2, 3, 1, 5)
+        layout.addWidget(self.patient_number_label, 3, 1)
+        layout.addWidget(self.condition_label, 3, 2)
+        layout.addWidget(self.has_hemorrhage_label, 3, 3)
+        layout.addWidget(self.has_fracture_label, 3, 4)
+        layout.addWidget(self.create_prediction_button, 4, 0)
         prediction = self.patient_data.iloc[self.index]['ImagePathBrain']
         prediction2 = self.patient_data.iloc[self.index]['ImagePathBrainMask']
+
         self.canvas.plot_multiple([prediction], [1])
         self.canvas_mask.plot_multiple([prediction, prediction2], [1, 0.7])
+
+        if len(self.predictions) > 0:
+            prediction3 = self.predictions[self.index]
+            self.canvas_predictions.plot_multiple(
+                [prediction, prediction3], [1, 0.7])
+        else:
+            self.canvas_predictions.plot_multiple([prediction], [1])
 
         # Set the layout
         self.setLayout(layout)
@@ -128,7 +147,12 @@ class exoplanetFilter(QWidget):
         pass
 
     def buttonClick(self):
-        print('button')
+        predictions = predict(
+            np.array([np.array(el).astype(np.float32) for el in self.patient_data['ImagePathBrain']]).astype(np.float32))
+        self.predictions = predictions
+        prediction3 = predictions[self.index]
+        self.canvas_predictions.plot_multiple(
+            [self.patient_data.iloc[self.index]['ImagePathBrain'], prediction3], [1, 0.7])
 
     def changePatientNumber(self):
         curr_val = self.patient_number_box.currentText()
@@ -139,6 +163,7 @@ class exoplanetFilter(QWidget):
         self.slider.setValue(0)
         self.slider.setMaximum(int(len(pd_new))-1)
         self.patient_data = pd_new
+        self.predictions = []
         self.update_image(0)
 
     def update_label(self):
@@ -154,6 +179,15 @@ class exoplanetFilter(QWidget):
         prediction2 = self.patient_data.iloc[self.index]['ImagePathBrainMask']
         self.canvas.plot_multiple([prediction], [1])
         self.canvas_mask.plot_multiple([prediction, prediction2], [1, 0.7])
+        print(len(self.predictions))
+        if len(self.predictions) > 0:
+            print('render?')
+            prediction3 = self.predictions[self.index]
+            self.canvas_predictions.plot_multiple(
+                [prediction, prediction3], [1, 0.7])
+        else:
+            self.canvas_predictions.plot_multiple([prediction], [1])
+
         self.condition_label.setText(OPEN_HEADER + "Condition:" +
                                      CLOSE_HEADER + OPEN_PARAGRAPH + str(self.patient_data.iloc[self.index]['Condition on file']) + CLOSE_PARAGRAPH)
         self.patient_number_label.setText(

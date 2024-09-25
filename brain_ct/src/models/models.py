@@ -1,11 +1,11 @@
-# from google.colab import drive
-
 import os
 os.environ["SM_FRAMEWORK"] = "tf.keras"
 
-from segmentation_models import get_preprocessing
-from segmentation_models.metrics import iou_score
 from segmentation_models import Unet
+from segmentation_models.metrics import iou_score
+from segmentation_models import get_preprocessing
+
+
 
 BACKBONE = "densenet121"
 preprocess_input = get_preprocessing(BACKBONE)
@@ -23,7 +23,6 @@ filepath = "model_no_aug.h5"
 model.load_weights('./'+filepath)
 
 
-def predict(test_generator, data_len):
-    predictions = model.predict(test_generator,
-                                steps=data_len,
-                                verbose=1)
+def predict(x_data):
+    predictions = model.predict(x_data, verbose=1)
+    return predictions
