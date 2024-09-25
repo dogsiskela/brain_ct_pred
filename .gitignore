@@ -1,0 +1,4 @@
+venv
+/model_aug.h5
+/model_no_aug.h5
+/patient_data.pkl
