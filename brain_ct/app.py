@@ -11,6 +11,7 @@ from PyQt5.QtGui import QIcon
 import matplotlib.pyplot as plt
 import pandas as pd
 import sys
+from src.data.data_test import get_brain_array_from_patient_data
 
 OPEN_PARAGRAPH = "<p>"
 CLOSE_PARAGRAPH = "</p>"
@@ -41,6 +42,9 @@ class exoplanetFilter(QWidget):
 
         self.patient_id = 49
         self.predictions = []
+
+        # new test
+        self.new_data = get_brain_array_from_patient_data()
 
         pd_new = pd.read_pickle('./patient_data.pkl')
         pd_new = pd_new[pd_new['PatientNumber'] == int(self.patient_id)]
@@ -179,9 +183,7 @@ class exoplanetFilter(QWidget):
         prediction2 = self.patient_data.iloc[self.index]['ImagePathBrainMask']
         self.canvas.plot_multiple([prediction], [1])
         self.canvas_mask.plot_multiple([prediction, prediction2], [1, 0.7])
-        print(len(self.predictions))
         if len(self.predictions) > 0:
-            print('render?')
             prediction3 = self.predictions[self.index]
             self.canvas_predictions.plot_multiple(
                 [prediction, prediction3], [1, 0.7])
