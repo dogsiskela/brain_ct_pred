@@ -11,12 +11,13 @@ from PyQt5.QtGui import QIcon
 import matplotlib.pyplot as plt
 import pandas as pd
 import sys
-from src.data.data_test import get_brain_array_from_patient_data
+from src.data.data_test import get_brain_array_from_patient_data,get_folders_with_files
 
 OPEN_PARAGRAPH = "<p>"
 CLOSE_PARAGRAPH = "</p>"
 OPEN_HEADER = "<h4>"
 CLOSE_HEADER = "</h4>"
+
 
 
 class MplCanvas(FigureCanvas):
@@ -66,7 +67,7 @@ class exoplanetFilter(QWidget):
         self.patient_label = QLabel(
             OPEN_PARAGRAPH + 'Patient Number:' + CLOSE_PARAGRAPH)
         self.patient_number_box = QComboBox()
-        self.patient_number_box.addItems([str(i) for i in range(49, 130)])
+        self.patient_number_box.addItems(get_folders_with_files())
         self.patient_number_box.currentIndexChanged.connect(
             self.changePatientNumber)
 
@@ -119,11 +120,11 @@ class exoplanetFilter(QWidget):
         layout.addWidget(self.label, 0, 1)
         layout.addWidget(self.patient_label, 0, 2)
         layout.addWidget(self.patient_number_box, 0, 3)
-        layout.addWidget(self.brain_image_label, 1, 0, 1, 1)
-        layout.addWidget(self.mask_original_label, 1, 1, 1, 2)
-        layout.addWidget(self.mask_predicted_label, 1, 3, 1, 5)
-        layout.addWidget(self.canvas, 2, 0, 1, 1)
-        layout.addWidget(self.canvas_predictions, 2, 1, 1, 2)
+        layout.addWidget(self.brain_image_label, 1, 0, 1, 2)
+        layout.addWidget(self.mask_original_label, 1, 2, 1, 2)
+        # layout.addWidget(self.mask_predicted_label, 1, 3, 1, 5)
+        layout.addWidget(self.canvas, 2, 0, 1, 2)
+        layout.addWidget(self.canvas_predictions, 2, 2, 1, 4)
         # layout.addWidget(self.canvas_predictions, 2, 3, 1, 5)
         layout.addWidget(self.patient_number_label, 3, 1)
         layout.addWidget(self.condition_label, 3, 2)
@@ -159,11 +160,12 @@ class exoplanetFilter(QWidget):
         curr_val = self.patient_number_box.currentText()
         if (curr_val == ''):
             return
-        pd_new = pd.read_pickle('./patient_data.pkl')
-        pd_new = pd_new[pd_new['PatientNumber'] == int(curr_val)]
+        # pd_new = pd.read_pickle('./patient_data.pkl')
+        # pd_new = pd_new[pd_new['PatientNumber'] == int(curr_val)]
+        self.new_data = get_brain_array_from_patient_data(curr_val)
         self.slider.setValue(0)
-        self.slider.setMaximum(int(len(pd_new))-1)
-        self.patient_data = pd_new
+        self.slider.setMaximum(int(len(self.new_data))-1)
+        # self.patient_data = pd_new
         self.predictions = []
         self.update_image(0)
 

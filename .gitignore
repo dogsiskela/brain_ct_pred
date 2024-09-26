@@ -3,3 +3,4 @@ venv
 /model_no_aug.h5
 /patient_data.pkl
 /model_aug_new.h5
+brain_ct/data
